@@ -1,0 +1,74 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Portfolio Pie Map</title>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/topojson-client@3/dist/topojson-client.min.js"></script>
+<style>
+ html,body{margin:0;height:100%;font-family:Arial,Helvetica,sans-serif}
+ #map{height:100%;background:#ffffff}
+ .title{position:absolute;top:12px;left:50px;z-index:1000;background:rgba(255,255,255,.92);
+   padding:8px 14px;border-radius:6px;box-shadow:0 1px 5px rgba(0,0,0,.3)}
+ .title h2{margin:0;font-size:16px} .title p{margin:2px 0 0;font-size:12px;color:#555}
+ .legend{background:#fff;padding:10px 12px;border-radius:6px;box-shadow:0 1px 5px rgba(0,0,0,.3);font-size:13px;line-height:1.7;color:#222}
+ .legend h4{margin:0 0 6px;font-size:13px} .li{white-space:nowrap}
+ .dot{display:inline-block;width:12px;height:12px;border-radius:50%;margin-right:6px;border:1px solid #fff;vertical-align:middle}
+ .sz{margin-top:8px;border-top:1px solid #ddd;padding-top:6px;color:#444}
+ .scirc{display:inline-block;border-radius:50%;background:#888;border:1px solid #fff;margin-right:6px;vertical-align:middle}
+ .pie-ico svg{display:block} .leaflet-popup-content{font-size:13px;line-height:1.5}
+</style></head><body>
+<div class="title"><h2>Boston Landscape Architecture Portfolio</h2>
+<p>Pie = location | slice color = project goal | pie size = number of projects</p></div>
+<div id="map"></div>
+<script>
+const sites=[{"loc": "Boston Harbor Islands, MA", "lat": 42.3289, "lon": -70.9264, "total": 1, "slices": [{"goal": "Parks, Trails + Open Space Stewardship", "n": 1, "color": "#2ca02c", "projects": ["DCR Gallops Island"]}]}, {"loc": "Boston, MA", "lat": 42.3601, "lon": -71.0589, "total": 6, "slices": [{"goal": "Resilience & Urban Corridors", "n": 3, "color": "#1f77b4", "projects": ["Rose Kennedy Greenway Parcel Improvements", "Dorchester Greenway", "Northern Avenue Bridge"]}, {"goal": "Aviation + Transit-Oriented Places", "n": 3, "color": "#ff7f0e", "projects": ["Massport Logan Airport Terminal E Improvements", "Massport Green Bus Depot", "MBTA Local Station Improvements"]}]}, {"loc": "CT to ME", "lat": 43.5, "lon": -72.5, "total": 1, "slices": [{"goal": "Parks, Trails + Open Space Stewardship", "n": 1, "color": "#2ca02c", "projects": ["NPS Appalachian Trail New England Prioritization"]}]}, {"loc": "Cambridge, MA", "lat": 42.3736, "lon": -71.1097, "total": 1, "slices": [{"goal": "Resilience & Urban Corridors", "n": 1, "color": "#1f77b4", "projects": ["DCR Memorial Drive"]}]}, {"loc": "Charles River, MA", "lat": 42.354, "lon": -71.13, "total": 1, "slices": [{"goal": "Parks, Trails + Open Space Stewardship", "n": 1, "color": "#2ca02c", "projects": ["DCR Head of the Charles Strategic Plan (Parkland Protection + Event Planning)"]}]}, {"loc": "Concord, MA", "lat": 42.47, "lon": -71.289, "total": 1, "slices": [{"goal": "Campus Landscapes", "n": 1, "color": "#9467bd", "projects": ["MIT / Hanscom Field"]}]}, {"loc": "Connecticut", "lat": 41.6032, "lon": -72.6851, "total": 1, "slices": [{"goal": "Resilience & Urban Corridors", "n": 1, "color": "#1f77b4", "projects": ["CIRCA / CVCOG Municipal Downtown Resilience Work"]}]}, {"loc": "Cranston, RI", "lat": 41.7798, "lon": -71.4373, "total": 1, "slices": [{"goal": "Aviation + Transit-Oriented Places", "n": 1, "color": "#ff7f0e", "projects": ["TF Green Airport Landscape Work"]}]}, {"loc": "Everett, MA", "lat": 42.4084, "lon": -71.0537, "total": 1, "slices": [{"goal": "Aviation + Transit-Oriented Places", "n": 1, "color": "#ff7f0e", "projects": ["Encore Boston Harbor Transportation Improvements"]}]}, {"loc": "Haverhill, MA", "lat": 42.7762, "lon": -71.0773, "total": 1, "slices": [{"goal": "Resilience & Urban Corridors", "n": 1, "color": "#1f77b4", "projects": ["Haverhill Washington Square Plaza Redesign"]}]}, {"loc": "Hyannis, MA", "lat": 41.6529, "lon": -70.2828, "total": 1, "slices": [{"goal": "Aviation + Transit-Oriented Places", "n": 1, "color": "#ff7f0e", "projects": ["CCRTA Hyannis Transportation Center + TOD Implementation"]}]}, {"loc": "Lawrence, MA", "lat": 42.707, "lon": -71.1631, "total": 1, "slices": [{"goal": "Aviation + Transit-Oriented Places", "n": 1, "color": "#ff7f0e", "projects": ["MEVA Lawrence Train Stop Plaza Redesign"]}]}, {"loc": "Manchester, NH", "lat": 42.9956, "lon": -71.4548, "total": 1, "slices": [{"goal": "Aviation + Transit-Oriented Places", "n": 1, "color": "#ff7f0e", "projects": ["Manchester-Boston Regional Airport Landscape Master Plan"]}]}, {"loc": "Massachusetts", "lat": 42.36, "lon": -71.99, "total": 1, "slices": [{"goal": "Resilience & Urban Corridors", "n": 1, "color": "#1f77b4", "projects": ["MassDOT Route 90 Toll Removals"]}]}, {"loc": "New Bedford, MA", "lat": 41.6362, "lon": -70.9342, "total": 3, "slices": [{"goal": "Resilience & Urban Corridors", "n": 3, "color": "#1f77b4", "projects": ["New Bedford Office Park", "New Bedford MacArthur Drive Corridor Study", "New Bedford JFK Memorial Highway Landscape Enhancement"]}]}, {"loc": "Newton / Wellesley, MA", "lat": 42.3165, "lon": -71.251, "total": 1, "slices": [{"goal": "Parks, Trails + Open Space Stewardship", "n": 1, "color": "#2ca02c", "projects": ["DCR Lower Falls"]}]}, {"loc": "Norwalk, CT", "lat": 41.1177, "lon": -73.4082, "total": 1, "slices": [{"goal": "Resilience & Urban Corridors", "n": 1, "color": "#1f77b4", "projects": ["Norwalk Citywide Resiliency Plan"]}]}, {"loc": "Norwell, MA", "lat": 42.1618, "lon": -70.7942, "total": 1, "slices": [{"goal": "Resilience & Urban Corridors", "n": 1, "color": "#1f77b4", "projects": ["MassDOT Route 3 Norwell"]}]}, {"loc": "Orleans, MA", "lat": 41.7898, "lon": -69.9895, "total": 1, "slices": [{"goal": "Resilience & Urban Corridors", "n": 1, "color": "#1f77b4", "projects": ["Town of Orleans Snow Library"]}]}, {"loc": "Presque Isle, ME", "lat": 46.6811, "lon": -68.0159, "total": 1, "slices": [{"goal": "Aviation + Transit-Oriented Places", "n": 1, "color": "#ff7f0e", "projects": ["Presque Isle Airport Landscape Work"]}]}, {"loc": "Providence, RI", "lat": 41.824, "lon": -71.4128, "total": 1, "slices": [{"goal": "Aviation + Transit-Oriented Places", "n": 1, "color": "#ff7f0e", "projects": ["RIPTA East Side Tunnel"]}]}, {"loc": "Salem, MA", "lat": 42.5195, "lon": -70.8967, "total": 2, "slices": [{"goal": "Resilience & Urban Corridors", "n": 2, "color": "#1f77b4", "projects": ["Salem Collins Cove Resilience Park", "Salem Offshore Wind Waterfront Park + Harbor Design"]}]}, {"loc": "Springfield, MA", "lat": 42.1015, "lon": -72.5898, "total": 1, "slices": [{"goal": "Resilience & Urban Corridors", "n": 1, "color": "#1f77b4", "projects": ["MassDOT Route 20 Springfield"]}]}, {"loc": "Storrs, CT", "lat": 41.8084, "lon": -72.2495, "total": 1, "slices": [{"goal": "Campus Landscapes", "n": 1, "color": "#9467bd", "projects": ["University of Connecticut Storrs Landscape Work"]}]}, {"loc": "Westfield, MA", "lat": 42.158, "lon": -72.716, "total": 1, "slices": [{"goal": "Campus Landscapes", "n": 1, "color": "#9467bd", "projects": ["Westfield Air Force Base"]}]}, {"loc": "Worcester, MA", "lat": 42.2626, "lon": -71.8023, "total": 1, "slices": [{"goal": "Parks, Trails + Open Space Stewardship", "n": 1, "color": "#2ca02c", "projects": ["DCR Worcester Project"]}]}], STATES=["Massachusetts", "Connecticut", "Rhode Island", "New Hampshire", "Maine", "Vermont"], CFG={"BASE": 8, "PER": 1, "SHOW_BASEMAP": true, "STATE_LINE": {"color": "#5a6b7a", "weight": 1.7, "opacity": 0.85}, "COUNTY_LINE": {"color": "#b3bcc4", "weight": 0.7, "opacity": 0.7}};
+const FIPS={'Connecticut':'09','Maine':'23','Massachusetts':'25','New Hampshire':'33','Rhode Island':'44','Vermont':'50','New York':'36'};
+const wantFips=new Set(STATES.map(s=>FIPS[s]).filter(Boolean));
+const map=L.map('map',{zoomControl:true,attributionControl:true});
+const tiles=L.tileLayer('https://{s}.basemaps.cartocdn.com/light_nolabels/{z}/{x}/{y}{r}.png',{attribution:'&copy; OpenStreetMap, &copy; CARTO',maxZoom:19});
+const labels=L.tileLayer('https://{s}.basemaps.cartocdn.com/light_only_labels/{z}/{x}/{y}{r}.png',{maxZoom:19,opacity:.9});
+const mapBase=L.layerGroup([tiles,labels]);
+const whiteBase=L.layerGroup([]);
+(CFG.SHOW_BASEMAP?mapBase:whiteBase).addTo(map);
+const stateLayer=L.layerGroup().addTo(map);
+const countyLayer=L.layerGroup().addTo(map);
+L.control.layers({'Street map':mapBase,'White (no basemap)':whiteBase},
+                 {'State borders':stateLayer,'County borders':countyLayer},{collapsed:false}).addTo(map);
+// State + county borders from ONE consistent source (us-atlas) so edges align
+fetch('https://cdn.jsdelivr.net/npm/us-atlas@3/counties-10m.json')
+ .then(r=>r.json()).then(topo=>{
+   const fid=f=>String(f.id).padStart(2,'0').slice(0,2);
+   const sFC=topojson.feature(topo,topo.objects.states);
+   const cFC=topojson.feature(topo,topo.objects.counties);
+   const sf=sFC.features.filter(f=>wantFips.has(fid(f)));
+   const cf=cFC.features.filter(f=>wantFips.has(fid(f)));
+   L.geoJSON({type:'FeatureCollection',features:cf},{style:Object.assign({fill:false},CFG.COUNTY_LINE)}).addTo(countyLayer);
+   L.geoJSON({type:'FeatureCollection',features:sf},{style:Object.assign({fill:false},CFG.STATE_LINE)}).addTo(stateLayer);
+ }).catch(e=>console.log('borders failed',e));
+function radius(t){return CFG.BASE+(t-1)*CFG.PER;}
+function pieSVG(slices,total,r){const size=2*r+4,cx=size/2,cy=size/2;
+  if(slices.length===1){return `<svg width="${size}" height="${size}"><circle cx="${cx}" cy="${cy}" r="${r}" fill="${slices[0].color}" stroke="#fff" stroke-width="1.5"/></svg>`;}
+  let a0=-Math.PI/2,paths='';
+  slices.forEach(s=>{const a1=a0+2*Math.PI*(s.n/total);
+    const x0=cx+r*Math.cos(a0),y0=cy+r*Math.sin(a0),x1=cx+r*Math.cos(a1),y1=cy+r*Math.sin(a1);
+    const large=(a1-a0)>Math.PI?1:0;
+    paths+=`<path d="M${cx},${cy} L${x0},${y0} A${r},${r} 0 ${large} 1 ${x1},${y1} Z" fill="${s.color}" stroke="#fff" stroke-width="1"/>`;a0=a1;});
+  return `<svg width="${size}" height="${size}">${paths}<circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="#fff" stroke-width="1.5"/></svg>`;}
+const pts=[];
+sites.sort((a,b)=>b.total-a.total).forEach(s=>{const r=radius(s.total),size=2*r+4;
+  const icon=L.divIcon({className:'pie-ico',html:pieSVG(s.slices,s.total,r),iconSize:[size,size],iconAnchor:[size/2,size/2]});
+  const mk=L.marker([s.lat,s.lon],{icon:icon}).addTo(map); pts.push([s.lat,s.lon]);
+  let body='<b>'+s.loc+'</b><br>Total projects: '+s.total+'<hr style="margin:4px 0">';
+  s.slices.forEach(sl=>{body+='<span style="color:'+sl.color+'">&#9679;</span> <b>'+sl.goal+'</b> ('+sl.n+')<br>';
+    body+=sl.projects.map(p=>'&nbsp;&nbsp;&bull; '+p).join('<br>')+'<br>';});
+  mk.bindPopup(body,{maxWidth:340});});
+map.fitBounds(pts,{padding:[50,50]});
+const lg=L.control({position:'bottomright'});
+lg.onAdd=function(){const d=L.DomUtil.create('div','legend');
+ d.innerHTML='<h4>Project Goal</h4><div class="li"><span class="dot" style="background:#1f77b4"></span>Resilience & Urban Corridors</div><div class="li"><span class="dot" style="background:#ff7f0e"></span>Aviation + Transit-Oriented Places</div><div class="li"><span class="dot" style="background:#2ca02c"></span>Parks, Trails + Open Space Stewardship</div><div class="li"><span class="dot" style="background:#9467bd"></span>Campus Landscapes</div>'+
+ '<div class="sz"><b>Pie size = # projects</b><br>'+
+ '<span class="scirc" style="width:18px;height:18px"></span>1 '+
+ '<span class="scirc" style="width:26px;height:26px"></span>3 '+
+ '<span class="scirc" style="width:34px;height:34px"></span>6</div>';return d;};
+lg.addTo(map);
+</script></body></html>
